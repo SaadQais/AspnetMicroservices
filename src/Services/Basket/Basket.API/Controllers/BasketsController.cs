@@ -1,6 +1,9 @@
-﻿using Basket.API.Entities;
+﻿using AutoMapper;
+using Basket.API.Entities;
 using Basket.API.GrpcServices.Interfaces;
 using Basket.API.Repositories;
+using EventBus.Messages.Events;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -12,11 +15,16 @@ namespace Basket.API.Controllers
     {
         private readonly IBasketRepository _repository;
         private readonly IDiscountGrpcService _discountGrpcService;
+        private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public BasketsController(IBasketRepository repository, IDiscountGrpcService discountGrpcService)
+        public BasketsController(IBasketRepository repository, IDiscountGrpcService discountGrpcService, 
+            IMapper mapper, IPublishEndpoint publishEndpoint)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _discountGrpcService = discountGrpcService ?? throw new ArgumentNullException(nameof(discountGrpcService));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
         }
 
         [HttpGet("{userName}", Name = "GetBasket")]
@@ -54,6 +62,26 @@ namespace Basket.API.Controllers
             await _repository.DeleteAsync(userName);
 
             return Ok("Basket deleted successfully");
+        }
+
+        [Route("[action]")]
+        [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.Accepted)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Checkout([FromBody] BasketCheckout basketCheckout)
+        {
+            var basket = await _repository.GetAsync(basketCheckout.UserName);
+            if (basket == null)
+            {
+                return BadRequest("Basket not found");
+            }
+
+            var eventMessage = _mapper.Map<BasketCheckoutEvent>(basketCheckout);
+            await _publishEndpoint.Publish(eventMessage);
+
+            await _repository.DeleteAsync(basketCheckout.UserName);
+
+            return Accepted();
         }
     }
 }
