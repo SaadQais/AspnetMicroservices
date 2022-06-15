@@ -9,7 +9,7 @@ using System.Net;
 
 namespace Basket.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class BasketsController : ControllerBase
     {
@@ -37,7 +37,7 @@ namespace Basket.API.Controllers
             return Ok(basket ?? new ShoppingCart(userName));
         }
 
-        [HttpPost(Name = "Basket")]
+        [HttpPost]
         [ProducesResponseType(typeof(ShoppingCart), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> UpdateBasket([FromBody] ShoppingCart basket)
         {
@@ -77,6 +77,8 @@ namespace Basket.API.Controllers
             }
 
             var eventMessage = _mapper.Map<BasketCheckoutEvent>(basketCheckout);
+            eventMessage.TotalPrice = basket.TotalPrice;
+            
             await _publishEndpoint.Publish(eventMessage);
 
             await _repository.DeleteAsync(basketCheckout.UserName);
