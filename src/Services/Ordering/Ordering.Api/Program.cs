@@ -13,21 +13,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-builder.Services.AddMassTransit(config =>
-{
+builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<BasketCheckoutConsumer>();
+
+builder.Services.AddMassTransit(config => {
+
     config.AddConsumer<BasketCheckoutConsumer>();
-    config.UsingRabbitMq((ctx, cfg) =>
-    {
-        cfg.Host(builder.Configuration["RabbitMqSettings:Host"]);
-        cfg.ReceiveEndpoint(EventBusConstants.BasketCheckoutQueue, c =>
-        {
+
+    config.UsingRabbitMq((ctx, cfg) => {
+        cfg.Host(builder.Configuration["EventBusSettings:HostAddress"]);
+
+        cfg.ReceiveEndpoint(EventBusConstants.BasketCheckoutQueue, c => {
             c.ConfigureConsumer<BasketCheckoutConsumer>(ctx);
         });
     });
 });
-
-builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddScoped<BasketCheckoutConsumer>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
