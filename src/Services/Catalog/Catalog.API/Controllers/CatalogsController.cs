@@ -5,14 +5,14 @@ using System.Net;
 
 namespace Catalog.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
-    public class ProductsController : ControllerBase
+    public class CatalogsController : ControllerBase
     {
         private readonly IProductRepository _repository;
-        private readonly ILogger<ProductsController> _logger;
+        private readonly ILogger<CatalogsController> _logger;
 
-        public ProductsController(IProductRepository repository, ILogger<ProductsController> logger)
+        public CatalogsController(IProductRepository repository, ILogger<CatalogsController> logger)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
