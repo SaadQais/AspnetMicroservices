@@ -110,20 +110,6 @@ services:
     ports:
       - "8003:80"
 
-
-  ordering.api:
-    container_name: ordering.api
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings:OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=sa;Password=Me$$i170100"
-      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
-    depends_on:
-      - orderdb
-      - rabbitmq
-    ports:
-      - "8004:80"
-
-
   ocelotapigw:
     container_name: ocelotapigw
     environment:
@@ -162,3 +148,16 @@ services:
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  ordering.api:
+    container_name: ordering.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=sa;Password=Me$$i170100"
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
+    depends_on:
+      - orderdb
+      - rabbitmq
+    ports:
+      - "8004:80"
+
