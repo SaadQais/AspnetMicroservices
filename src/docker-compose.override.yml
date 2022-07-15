@@ -137,18 +137,6 @@ services:
     ports:
       - "8005:80"
 
-
-  #aspnetrunbasics:
-  #  environment:
-  #    - ASPNETCORE_ENVIRONMENT=Development
-  #    - ASPNETCORE_URLS=https://+:443;http://+:80
-  #  ports:
-  #    - "80"
-  #    - "443"
-  #  volumes:
-  #    - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-  #    - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-
   ordering.api:
     container_name: ordering.api
     environment:
@@ -161,3 +149,16 @@ services:
     ports:
       - "8004:80"
 
+  aspnetrunbasics:
+    container_name: aspnetrunbasics
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ApiSettings:GatewayAddress=http://ocelotapigw"
+    depends_on:
+      - ocelotapigw
+      - catalog.api
+      - basket.api
+      - discount.api
+      - ordering.api
+    ports:
+      - "8006:80"
