@@ -1,10 +1,14 @@
 using Basket.API.GrpcServices.Interfaces;
 using Basket.API.GrpcServices.Services;
 using Basket.API.Repositories;
+using Common.Logging;
 using MassTransit;
+using Serilog;
 using static Discount.Grpc.Protos.DiscountProtoService;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog(SeriLogger.Configure);
 
 // Add services to the container.
 
